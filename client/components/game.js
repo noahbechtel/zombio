@@ -22,6 +22,7 @@ class Game extends Component {
     let mouseY = 0
     let pX = 0
     let pY = 0
+    let sprint = false
     let flash = true
     let firing = false
     let zMax = 10
@@ -37,17 +38,39 @@ class Game extends Component {
       switch (evt.key) {
         case 'd':
           rightPressed = true
+          sprint = false
           break
         case 'a':
           leftPressed = true
+          sprint = false
           break
         case 's':
           downPressed = true
+          sprint = false
           break
         case 'w':
           upPressed = true
+          sprint = false
           break
-
+        case 'D':
+          rightPressed = true
+          sprint = true
+          break
+        case 'A':
+          leftPressed = true
+          sprint = true
+          break
+        case 'S':
+          downPressed = true
+          sprint = true
+          break
+        case 'W':
+          upPressed = true
+          sprint = true
+          break
+        case 'shift':
+          sprint = true
+          break
         default:
           break
       }
@@ -57,16 +80,36 @@ class Game extends Component {
       switch (evt.key) {
         case 'd':
           rightPressed = false
+          sprint = false
           break
         case 'a':
           leftPressed = false
+          sprint = false
           break
         case 's':
+            sprint = false
           downPressed = false
           break
         case 'w':
           upPressed = false
+          sprint = false
           break
+        case 'D':
+          rightPressed = false
+          break
+        case 'A':
+          leftPressed = false
+          break
+        case 'S':
+          downPressed = false
+          break
+        case 'W':
+          upPressed = false
+          break
+
+        case 'shift':
+          sprint = false
+        break
         default:
           break
       }
@@ -138,10 +181,10 @@ class Game extends Component {
           moveUp = false
         }
       })
-      if (upPressed && moveUp) pY++
-      if (downPressed && moveDown) pY--
-      if (rightPressed && moveRight) pX--
-      if (leftPressed && moveLeft) pX++
+      if (upPressed && moveUp) sprint ? (pY += 2) : pY++
+      if (downPressed && moveDown) sprint ? (pY -= 2) : pY--
+      if (rightPressed && moveRight) sprint ? (pX -= 2) : pX--
+      if (leftPressed && moveLeft) sprint ? (pX += 2) : pX++
     }
 
     const renderMap = () => {
