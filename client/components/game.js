@@ -159,7 +159,7 @@ class Game extends Component {
       const makeZom = () => {
         const x = Math.round(Math.random() * 500)
         const y = Math.round(Math.random() * 500)
-        zombies.push({ health: 100, x, y })
+        zombies.push({ health: 500, x, y })
       }
       if (zombies.length <= zMax) {
         setInterval(makeZom(), 1000)
@@ -392,9 +392,7 @@ class Game extends Component {
             }
             if (id !== null) {
               harm()
-              setInterval(() => {
-                hit = false
-              }, 50)
+              hit = false
               if (zombies[id].health <= 0) {
                 const x = Math.round(Math.random() * 500)
                 const y = Math.round(Math.random() * 500)
