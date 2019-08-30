@@ -26,26 +26,53 @@ class Game extends Component {
     }
 
     let rightPressed = false
+
     let leftPressed = false
+
     let upPressed = false
+
     let downPressed = false
+
+    let points = 0
+
     let playerSize = 15
+
     let xLimit = 500
+
+    let playerDead = false
+
     let yLimit = 500
+
     let interval
+
     let mouseX = 0
+
     let mouseY = 0
+
     let pX = 0
+
     let pY = 0
+
     let health = 296
+
     let stamina = 296
+
     let sprint = false
+
     let flash = true
+
     let firing = false
+
     let zMax = 10
+
     let zombies = []
+
     let staminaBuffer = 0
+
+    let healthBuffer = 0
+
     let center = [canvas.width / 2, canvas.height / 2]
+
     let collisions = [
       { x: 20, y: 20, width: 100, height: 10 },
       { x: 20, y: 20, width: 10, height: 100 },
@@ -211,9 +238,9 @@ class Game extends Component {
         if (stamina < 296 && staminaBuffer === 'end') {
           stamina += 0.5
         } else {
-          if ( staminaBuffer > 0) {
+          if (staminaBuffer > 0) {
             staminaBuffer--
-          } else if(stamina < 296){
+          } else if (stamina < 296) {
             staminaBuffer = 'end'
             stamina = 1
           }
@@ -258,7 +285,6 @@ class Game extends Component {
           center[1]
 
         zombies.push({ health: 500, x, y })
-        console.log(x, y)
       }
       if (zombies.length <= zMax) {
         setInterval(makeZom(), 1000)
@@ -602,6 +628,7 @@ class Game extends Component {
                 zombies[id].y = y
                 zombies[id].health = 100
                 hit = false
+                points++
               }
             }
           }
@@ -611,12 +638,37 @@ class Game extends Component {
       }
     }
     const renderPlayer = () => {
-      ctx.beginPath()
-      ctx.arc(center[0], center[1], playerSize, 0, Math.PI * 2)
-      // ctx.rect(center[0], center[1], playerSize, playerSize - 5)
-      ctx.fillStyle = palette.playerColor
-      ctx.fill()
-      ctx.closePath()
+      if (!playerDead) {
+        ctx.beginPath()
+        ctx.arc(center[0], center[1], playerSize, 0, Math.PI * 2)
+        // ctx.rect(center[0], center[1], playerSize, playerSize - 5)
+        ctx.fillStyle = palette.playerColor
+        ctx.fill()
+        ctx.closePath()
+        let x = center[0] - pX
+        let y = center[1] - pY
+        zombies.map(zed => {
+          if (
+            x + playerSize > zed.x - playerSize &&
+            x - playerSize < zed.x + playerSize &&
+            y + playerSize > zed.y - playerSize &&
+            y - playerSize < zed.y + playerSize
+          ) {
+            if (health > 0) {
+              health -= 0.3
+              healthBuffer = 4000
+            }
+          }
+          if (health <= 0) {
+            playerDead = true
+          }
+          if (healthBuffer > 0) {
+            healthBuffer--
+          } else if (health < 296) {
+            health += 0.1
+          }
+        })
+      }
     }
     const renderInfo = () => {
       ctx.beginPath()
@@ -625,6 +677,7 @@ class Game extends Component {
       ctx.fillText(`X:${pX},Y:${pY}`, 10, 50)
       ctx.closePath()
     }
+
     const renderStats = () => {
       ctx.beginPath()
       ctx.fillStyle = palette.healthBarBG
@@ -636,7 +689,17 @@ class Game extends Component {
       ctx.fillRect(12, canvas.height - 48, health, 16)
       ctx.fillStyle = palette.staminaBarFG
       ctx.fillRect(12, canvas.height - 78, stamina, 16)
+      ctx.fillStyle = palette.pointsColor
+      ctx.font = '30px Arial'
+      ctx.fillText(points, 10, canvas.height - 100)
       ctx.closePath()
+      if (playerDead) {
+        ctx.beginPath()
+        ctx.fillStyle = palette.pointsColor
+        ctx.font = '30px Arial'
+        ctx.fillText('You Died', center[0], center[1])
+        ctx.closePath()
+      }
     }
 
     const draw = () => {
@@ -648,10 +711,10 @@ class Game extends Component {
 
       playerMotionHandler()
       renderBullets()
-      renderMap()
+      renderInfo()
       renderPlayer()
       renderZombies()
-      renderInfo()
+      renderMap()
       renderStats()
     }
     interval = setInterval(draw, 10)
