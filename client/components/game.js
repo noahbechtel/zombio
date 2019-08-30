@@ -24,53 +24,29 @@ class Game extends Component {
       pointsColor: '#fdf6f6',
       wallsColor: '#d3d6db'
     }
-
     let rightPressed = false
-
     let leftPressed = false
-
     let upPressed = false
-
     let downPressed = false
-
     let points = 0
-
     let playerSize = 15
-
     let xLimit = 500
-
     let playerDead = false
-
     let yLimit = 500
-
     let interval
-
     let mouseX = 0
-
     let mouseY = 0
-
     let pX = 0
-
     let pY = 0
-
     let health = 296
-
     let stamina = 296
-
     let sprint = false
-
     let flash = true
-
     let firing = false
-
     let zMax = 10
-
     let zombies = []
-
     let staminaBuffer = 0
-
     let healthBuffer = 0
-
     let center = [canvas.width / 2, canvas.height / 2]
 
     let collisions = [
@@ -678,6 +654,16 @@ class Game extends Component {
       ctx.closePath()
     }
 
+    const renderFX = () => {
+      if (health > 0) {
+        ctx.fillStyle = `rgba(200,30,30,${(100 / health) * 0.1})`
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+      } else {
+        ctx.fillStyle = `rgba(200,30,30,1)`
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+      }
+    }
+
     const renderStats = () => {
       ctx.beginPath()
       ctx.fillStyle = palette.healthBarBG
@@ -715,6 +701,7 @@ class Game extends Component {
       renderPlayer()
       renderZombies()
       renderMap()
+      renderFX()
       renderStats()
     }
     interval = setInterval(draw, 10)
