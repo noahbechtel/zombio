@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
+import { mapPointers } from '../map'
 
 /**
  * COMPONENT
@@ -11,27 +12,45 @@ class Game extends Component {
   componentDidMount () {
     const canvas = this.refs.canvas
     const ctx = canvas.getContext('2d')
+    const palette = {
+      zombieColor: '#80ac7b',
+      tracer: '#eeeeee',
+      background: '#393e46',
+      healthBarFG: '#f73859',
+      healthBarBG: '#232931',
+      staminaBarFG: '#4ecca3',
+      staminaBarBG: '#232931',
+      playerColor: '#f5841a',
+      pointsColor: '#fdf6f6',
+      wallsColor: '#d3d6db'
+    }
 
     let rightPressed = false
     let leftPressed = false
     let upPressed = false
     let downPressed = false
     let playerSize = 15
+    let xLimit = 500
+    let yLimit = 500
     let interval
     let mouseX = 0
     let mouseY = 0
     let pX = 0
     let pY = 0
+    let health = 296
+    let stamina = 296
     let sprint = false
     let flash = true
     let firing = false
     let zMax = 10
     let zombies = []
+    let staminaBuffer = 0
     let center = [canvas.width / 2, canvas.height / 2]
     let collisions = [
-      { x: 10, y: 10, width: 100, height: 10 },
-      { x: 10, y: 10, width: 10, height: 100 },
-      { x: 110, y: 10, width: 10, height: 100 }
+      { x: 20, y: 20, width: 100, height: 10 },
+      { x: 20, y: 20, width: 10, height: 100 },
+      { x: 120, y: 20, width: 10, height: 100 },
+      { x: 120, y: 110, width: 100, height: 10 }
     ]
 
     const keyDownHandler = evt => {
@@ -87,7 +106,7 @@ class Game extends Component {
           sprint = false
           break
         case 's':
-            sprint = false
+          sprint = false
           downPressed = false
           break
         case 'w':
@@ -109,7 +128,7 @@ class Game extends Component {
 
         case 'shift':
           sprint = false
-        break
+          break
         default:
           break
       }
@@ -181,15 +200,41 @@ class Game extends Component {
           moveUp = false
         }
       })
-      if (upPressed && moveUp) sprint ? (pY += 2) : pY++
-      if (downPressed && moveDown) sprint ? (pY -= 2) : pY--
-      if (rightPressed && moveRight) sprint ? (pX -= 2) : pX--
-      if (leftPressed && moveLeft) sprint ? (pX += 2) : pX++
+
+      if (sprint && stamina > 0) {
+        stamina--
+      } else {
+        if (stamina <= 0 && staminaBuffer === 'end') {
+          sprint = false
+          staminaBuffer = 300
+        }
+        if (stamina < 296 && staminaBuffer === 'end') {
+          stamina += 0.5
+        } else {
+          if ( staminaBuffer > 0) {
+            staminaBuffer--
+          } else if(stamina < 296){
+            staminaBuffer = 'end'
+            stamina = 1
+          }
+
+          sprint = false
+        }
+      }
+
+      if (upPressed && moveUp && pY <= yLimit) sprint ? (pY += 2) : pY++
+      if (downPressed && moveDown && pY >= yLimit * -1) {
+        sprint ? (pY -= 2) : pY--
+      }
+      if (rightPressed && moveRight && pX >= xLimit * -1) {
+        sprint ? (pX -= 2) : pX--
+      }
+      if (leftPressed && moveLeft && pX <= xLimit) sprint ? (pX += 2) : pX++
     }
 
     const renderMap = () => {
       collisions.map(obj => {
-        ctx.fillStyle = '#FFF'
+        ctx.fillStyle = palette.wallsColor
         ctx.fillRect(
           center[0] + pX + obj.x,
           center[1] + pY + obj.y,
@@ -199,24 +244,137 @@ class Game extends Component {
       })
     }
     const renderZombies = () => {
+      let thrust = 1
+      let velX = 0
+      let velY = 0
       const makeZom = () => {
-        const x = Math.round(Math.random() * 500)
-        const y = Math.round(Math.random() * 500)
+        const x =
+          Math.round(Math.random() * 1000) * (Math.random() > 0.5 ? -1 : 1) +
+          pX +
+          center[0]
+        const y =
+          Math.round(Math.random() * 1000) * (Math.random() > 0.5 ? -1 : 1) +
+          pY +
+          center[1]
+
         zombies.push({ health: 500, x, y })
+        console.log(x, y)
       }
       if (zombies.length <= zMax) {
         setInterval(makeZom(), 1000)
       }
+
       zombies.map(zed => {
         if (zed.health > 0) {
+          var tx = center[0] - pX - zed.x
+
+          var ty = center[1] - pY - zed.y
+
+          var dist = Math.sqrt(tx * tx + ty * ty)
+
+          var rad = Math.atan2(ty, tx)
+
+          velX = (tx / dist) * thrust
+          velY = (ty / dist) * thrust
+
+          let x = zed.x
+          let y = zed.y
+          let moveLeft = true
+          let moveRight = true
+          let moveUp = true
+          let moveDown = true
+
+          collisions.map(obj => {
+            if (
+              x - playerSize / 2 > obj.x + center[0] &&
+              x - playerSize < obj.x + obj.width + center[0] &&
+              y > obj.y + center[1] &&
+              y < obj.y + obj.height + center[1]
+            ) {
+              moveLeft = false
+            }
+
+            if (
+              x + playerSize > obj.x + center[0] &&
+              x + playerSize / 2 < obj.x + obj.width + center[0] &&
+              y > obj.y + center[1] &&
+              y < obj.y + obj.height + center[1]
+            ) {
+              moveRight = false
+            }
+
+            if (
+              x > obj.x + center[0] &&
+              x < obj.x + obj.width + center[0] &&
+              y + playerSize / 2 > obj.y + center[1] &&
+              y + playerSize < obj.y + obj.height + center[1]
+            ) {
+              moveDown = false
+            }
+
+            if (
+              x > obj.x + center[0] &&
+              x < obj.x + obj.width + center[0] &&
+              y - playerSize > obj.y + center[1] &&
+              y - playerSize / 2 < obj.y + obj.height + center[1]
+            ) {
+              moveUp = false
+            }
+          })
+
+          zombies.map(obj => {
+            if (
+              x - playerSize > obj.x &&
+              x - playerSize < obj.x + playerSize &&
+              y > obj.y &&
+              y < obj.y + playerSize / 2
+            ) {
+              moveLeft = false
+            }
+
+            if (
+              x + playerSize > obj.x &&
+              x + playerSize < obj.x + playerSize &&
+              y > obj.y &&
+              y < obj.y + playerSize / 2
+            ) {
+              moveRight = false
+            }
+
+            if (
+              x > obj.x &&
+              x < obj.x + playerSize / 2 &&
+              y + playerSize > obj.y &&
+              y + playerSize < obj.y + playerSize
+            ) {
+              moveDown = false
+            }
+
+            if (
+              x > obj.x &&
+              x < obj.x + playerSize / 2 &&
+              y - playerSize > obj.y &&
+              y - playerSize < obj.y + playerSize
+            ) {
+              moveUp = false
+            }
+          })
+
+          if (moveUp && velY <= 0) zed.y += velY
+          if (moveDown && velY >= 0) zed.y += velY
+
+          if (moveRight && velX >= 0) zed.x += velX
+          if (moveLeft && velX <= 0) zed.x += velX
+
           ctx.beginPath()
           ctx.arc(zed.x + pX, zed.y + pY, playerSize, 0, Math.PI * 2)
-          ctx.fillStyle = `#a0c334`
+          ctx.fillStyle = palette.zombieColor
           ctx.fill()
           ctx.closePath()
         }
       })
     }
+
     const renderBullets = () => {
       let line1StartX = center[0]
       let line1StartY = center[1]
@@ -294,6 +452,7 @@ class Game extends Component {
           ctx.beginPath()
           ctx.moveTo(center[0], center[1])
           ctx.lineTo(x, y)
+          ctx.strokeStyle = palette.tracer
           ctx.stroke()
           flash = false
         } else {
@@ -455,14 +614,28 @@ class Game extends Component {
       ctx.beginPath()
       ctx.arc(center[0], center[1], playerSize, 0, Math.PI * 2)
       // ctx.rect(center[0], center[1], playerSize, playerSize - 5)
-      ctx.fillStyle = `#f34573`
+      ctx.fillStyle = palette.playerColor
       ctx.fill()
       ctx.closePath()
     }
     const renderInfo = () => {
       ctx.beginPath()
+      ctx.fillStyle = palette.pointsColor
       ctx.font = '30px Arial'
       ctx.fillText(`X:${pX},Y:${pY}`, 10, 50)
+      ctx.closePath()
+    }
+    const renderStats = () => {
+      ctx.beginPath()
+      ctx.fillStyle = palette.healthBarBG
+      // containers
+      ctx.fillRect(10, canvas.height - 50, 300, 20)
+      ctx.fillRect(10, canvas.height - 80, 300, 20)
+      // percentages
+      ctx.fillStyle = palette.healthBarFG
+      ctx.fillRect(12, canvas.height - 48, health, 16)
+      ctx.fillStyle = palette.staminaBarFG
+      ctx.fillRect(12, canvas.height - 78, stamina, 16)
       ctx.closePath()
     }
 
@@ -470,7 +643,7 @@ class Game extends Component {
       ctx.canvas.width = window.innerWidth
       ctx.canvas.height = window.innerHeight
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.fillStyle = '#DDDDDD'
+      ctx.fillStyle = palette.background
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
       playerMotionHandler()
@@ -479,6 +652,7 @@ class Game extends Component {
       renderPlayer()
       renderZombies()
       renderInfo()
+      renderStats()
     }
     interval = setInterval(draw, 10)
     draw()
