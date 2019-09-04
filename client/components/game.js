@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { mapPointers } from '../map'
+import { movePlayer, players } from '../socket'
 
 /**
  * COMPONENT
@@ -10,6 +11,7 @@ class Game extends Component {
     super()
   }
   componentDidMount () {
+    console.log(players)
     const canvas = this.refs.canvas
     const ctx = canvas.getContext('2d')
     const palette = {
@@ -43,7 +45,7 @@ class Game extends Component {
     let sprint = false
     let flash = true
     let firing = false
-    let zMax = 10
+    let zMax = 0
     let zombies = []
     let staminaBuffer = 0
     let healthBuffer = 0
@@ -58,6 +60,9 @@ class Game extends Component {
 
     const keyDownHandler = evt => {
       switch (evt.key) {
+        case 'b':
+          console.log(players)
+          break
         case 'd':
           rightPressed = true
           sprint = false
@@ -613,6 +618,18 @@ class Game extends Component {
         shoot(bX || mouseX, bY || mouseY)
       }
     }
+    const renderOtherPlayers = () => {
+      const coords = Object.values(players)
+      console.log(coords.length)
+      coords.forEach((coord)=> {
+        ctx.beginPath()
+        ctx.arc(center[0]-coord.x +pX,center[1]- coord.y+pY, playerSize, 0, Math.PI * 2)
+        // ctx.rect(center[0], center[1], playerSize, playerSize - 5)
+        ctx.fillStyle = palette.playerColor
+        ctx.fill()
+        ctx.closePath()
+      })
+    }
     const renderPlayer = () => {
       if (!playerDead) {
         ctx.beginPath()
@@ -699,13 +716,15 @@ class Game extends Component {
       renderBullets()
       renderInfo()
       renderPlayer()
+      renderOtherPlayers()
       renderZombies()
       renderMap()
       renderFX()
       renderStats()
+
+      movePlayer(pX, pY)
     }
     interval = setInterval(draw, 10)
-    draw()
   }
 
   render () {
