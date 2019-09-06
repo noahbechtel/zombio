@@ -1,7 +1,12 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { mapPointers } from '../map'
-import { movePlayer, players } from '../socket'
+import {
+  movePlayer,
+  players,
+  killPlayer,
+  zombies as zombieList,
+} from '../socket'
 
 /**
  * COMPONENT
@@ -45,11 +50,10 @@ class Game extends Component {
     let sprint = false
     let flash = true
     let firing = false
-    let zMax = 0
-    let zombies = []
     let staminaBuffer = 0
     let healthBuffer = 0
     let center = [canvas.width / 2, canvas.height / 2]
+    let zombies = []
 
     let collisions = [
       { x: 20, y: 20, width: 100, height: 10 },
@@ -252,133 +256,13 @@ class Game extends Component {
       })
     }
     const renderZombies = () => {
-      let thrust = 1
-      let velX = 0
-      let velY = 0
-      const makeZom = () => {
-        const x =
-          Math.round(Math.random() * 1000) * (Math.random() > 0.5 ? -1 : 1) +
-          pX +
-          center[0]
-        const y =
-          Math.round(Math.random() * 1000) * (Math.random() > 0.5 ? -1 : 1) +
-          pY +
-          center[1]
-
-        zombies.push({ health: 500, x, y })
-      }
-      if (zombies.length <= zMax) {
-        setInterval(makeZom(), 1000)
-      }
-
-      zombies.map(zed => {
-        if (zed.health > 0) {
-          var tx = center[0] - pX - zed.x
-
-          var ty = center[1] - pY - zed.y
-
-          var dist = Math.sqrt(tx * tx + ty * ty)
-
-          var rad = Math.atan2(ty, tx)
-
-          velX = (tx / dist) * thrust
-          velY = (ty / dist) * thrust
-
-          let x = zed.x
-          let y = zed.y
-          let moveLeft = true
-          let moveRight = true
-          let moveUp = true
-          let moveDown = true
-
-          collisions.map(obj => {
-            if (
-              x - playerSize / 2 > obj.x + center[0] &&
-              x - playerSize < obj.x + obj.width + center[0] &&
-              y > obj.y + center[1] &&
-              y < obj.y + obj.height + center[1]
-            ) {
-              moveLeft = false
-            }
-
-            if (
-              x + playerSize > obj.x + center[0] &&
-              x + playerSize / 2 < obj.x + obj.width + center[0] &&
-              y > obj.y + center[1] &&
-              y < obj.y + obj.height + center[1]
-            ) {
-              moveRight = false
-            }
-
-            if (
-              x > obj.x + center[0] &&
-              x < obj.x + obj.width + center[0] &&
-              y + playerSize / 2 > obj.y + center[1] &&
-              y + playerSize < obj.y + obj.height + center[1]
-            ) {
-              moveDown = false
-            }
-
-            if (
-              x > obj.x + center[0] &&
-              x < obj.x + obj.width + center[0] &&
-              y - playerSize > obj.y + center[1] &&
-              y - playerSize / 2 < obj.y + obj.height + center[1]
-            ) {
-              moveUp = false
-            }
-          })
-
-          zombies.map(obj => {
-            if (
-              x - playerSize > obj.x &&
-              x - playerSize < obj.x + playerSize &&
-              y > obj.y &&
-              y < obj.y + playerSize / 2
-            ) {
-              moveLeft = false
-            }
-
-            if (
-              x + playerSize > obj.x &&
-              x + playerSize < obj.x + playerSize &&
-              y > obj.y &&
-              y < obj.y + playerSize / 2
-            ) {
-              moveRight = false
-            }
-
-            if (
-              x > obj.x &&
-              x < obj.x + playerSize / 2 &&
-              y + playerSize > obj.y &&
-              y + playerSize < obj.y + playerSize
-            ) {
-              moveDown = false
-            }
-
-            if (
-              x > obj.x &&
-              x < obj.x + playerSize / 2 &&
-              y - playerSize > obj.y &&
-              y - playerSize < obj.y + playerSize
-            ) {
-              moveUp = false
-            }
-          })
-
-          if (moveUp && velY <= 0) zed.y += velY
-          if (moveDown && velY >= 0) zed.y += velY
-
-          if (moveRight && velX >= 0) zed.x += velX
-          if (moveLeft && velX <= 0) zed.x += velX
-
-          ctx.beginPath()
-          ctx.arc(zed.x + pX, zed.y + pY, playerSize, 0, Math.PI * 2)
-          ctx.fillStyle = palette.zombieColor
-          ctx.fill()
-          ctx.closePath()
-        }
+      const zeds = Object.values(zombieList)
+      zeds.forEach(zed => {
+        ctx.beginPath()
+        ctx.arc(pX -center[0] - zed.x ,  pY -center[1]- zed.y, playerSize, 0, Math.PI * 2)
+        ctx.fillStyle = palette.zombieColor
+        ctx.fill()
+        ctx.closePath()
       })
     }
 
@@ -620,10 +504,15 @@ class Game extends Component {
     }
     const renderOtherPlayers = () => {
       const coords = Object.values(players)
-      console.log(coords.length)
-      coords.forEach((coord)=> {
+      coords.forEach(coord => {
         ctx.beginPath()
-        ctx.arc(center[0]-coord.x +pX,center[1]- coord.y+pY, playerSize, 0, Math.PI * 2)
+        ctx.arc(
+          center[0] - coord.x + pX,
+          center[1] - coord.y + pY,
+          playerSize,
+          0,
+          Math.PI * 2
+        )
         // ctx.rect(center[0], center[1], playerSize, playerSize - 5)
         ctx.fillStyle = palette.playerColor
         ctx.fill()
@@ -654,6 +543,7 @@ class Game extends Component {
           }
           if (health <= 0) {
             playerDead = true
+            killPlayer()
           }
           if (healthBuffer > 0) {
             healthBuffer--
@@ -732,8 +622,8 @@ class Game extends Component {
       <div>
         <canvas
           ref='canvas'
-          width={screen.width - 20}
-          height={screen.height - 100}
+          width={800}
+          height={800}
           onKeyPress={this.keyPress}
           tabIndex='0'
         />

@@ -2,6 +2,7 @@ import io from 'socket.io-client'
 
 const socket = io(window.location.origin)
 export let players = {}
+export let zombies = {}
 export let shots = []
 
 export const movePlayer = (x, y) => {
@@ -13,17 +14,26 @@ export const emitFire = (x, y) => {
 export const removeShot = id => {
   shots.splice(id, 1)
 }
+export const killPlayer = () => {
+  socket.emit('kill-player')
+}
 
 socket.on('connect', p => {
   console.log('Connected')
 })
 
-socket.on('start', p => {
+socket.on('start', res => {
   console.log('started')
-  players = p
+  players = res.players
+  zombies = res.zombies
+  console.log(zombies, players)
 })
 socket.on('me', id => {
   console.log(id)
+})
+
+socket.on('update-zombies', zoms => {
+  zombies = zoms
 })
 
 socket.on('update-player', (id, player) => {
