@@ -3,19 +3,21 @@ import io from 'socket.io-client'
 const socket = io(window.location.origin)
 export let players = {}
 export let zombies = {}
-export let shots = []
+export let bullets = []
+export let startX = 0
+export let startY = 0
 
 export const movePlayer = (x, y) => {
   socket.emit('move-player', { x, y })
 }
-export const emitFire = (x, y) => {
-  socket.emit('fire-player', { x, y })
-}
-export const removeShot = id => {
-  shots.splice(id, 1)
+export const emitFire = (startX, startY, endX, endY) => {
+  socket.emit('fire-player', { startX, startY, endX, endY })
 }
 export const killPlayer = () => {
   socket.emit('kill-player')
+}
+export const startGame = (x, y, centerX, centerY) => {
+  socket.emit('start-game', { x, y, centerX, centerY })
 }
 
 socket.on('connect', p => {
@@ -26,10 +28,15 @@ socket.on('start', res => {
   console.log('started')
   players = res.players
   zombies = res.zombies
+  startX = res.x
+  startY = res.y
   console.log(zombies, players)
 })
 socket.on('me', id => {
   console.log(id)
+})
+socket.on('update-Bullets', b => {
+  bullets.push(b)
 })
 
 socket.on('update-zombies', zoms => {
@@ -37,8 +44,12 @@ socket.on('update-zombies', zoms => {
 })
 
 socket.on('update-player', (id, player) => {
-  players[id].x = player.x
-  players[id].y = player.y
+  if (players[id]) {
+    players[id].x = player.x
+    players[id].y = player.y
+    players[id].centerX = player.centerX
+    players[id].centerY = player.centerY
+  }
 })
 
 socket.on('add-player', p => {
@@ -48,9 +59,8 @@ socket.on('add-player', p => {
 socket.on('remove-player', id => {
   delete players[id]
 })
-socket.on('player-shooting', (x, y, id) => {
-  let player = players.map(p => (p.id === id ? p : null))
-  shots.push({ playerX: player.x, playerY: player.y, shotX: x, shotY: y })
+socket.on('player-shooting', shot => {
+  bullets.push(shot)
 })
 
 export default socket

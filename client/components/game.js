@@ -6,6 +6,8 @@ import {
   players,
   killPlayer,
   zombies as zombieList,
+  startGame,
+  bullets
 } from '../socket'
 
 /**
@@ -16,7 +18,6 @@ class Game extends Component {
     super()
   }
   componentDidMount () {
-    console.log(players)
     const canvas = this.refs.canvas
     const ctx = canvas.getContext('2d')
     const palette = {
@@ -38,13 +39,15 @@ class Game extends Component {
     let points = 0
     let playerSize = 15
     let xLimit = 500
-    let playerDead = false
     let yLimit = 500
+    let playerDead = false
     let interval
     let mouseX = 0
     let mouseY = 0
-    let pX = 0
-    let pY = 0
+    let pX = Math.round(Math.random() * 500) * (Math.random() > 0.5 ? -1 : 1)
+    let pY = Math.round(Math.random() * 500) * (Math.random() > 0.5 ? -1 : 1)
+    let center = [canvas.width / 2, canvas.height / 2]
+     startGame(pX,pY, center[0],center[1])
     let health = 296
     let stamina = 296
     let sprint = false
@@ -52,8 +55,8 @@ class Game extends Component {
     let firing = false
     let staminaBuffer = 0
     let healthBuffer = 0
-    let center = [canvas.width / 2, canvas.height / 2]
-    let zombies = []
+    
+    
 
     let collisions = [
       { x: 20, y: 20, width: 100, height: 10 },
@@ -64,9 +67,7 @@ class Game extends Component {
 
     const keyDownHandler = evt => {
       switch (evt.key) {
-        case 'b':
-          console.log(players)
-          break
+      
         case 'd':
           rightPressed = true
           sprint = false
@@ -259,7 +260,7 @@ class Game extends Component {
       const zeds = Object.values(zombieList)
       zeds.forEach(zed => {
         ctx.beginPath()
-        ctx.arc(pX -center[0] - zed.x ,  pY -center[1]- zed.y, playerSize, 0, Math.PI * 2)
+        ctx.arc(zed.x + pX, zed.y + pY, playerSize, 0, Math.PI * 2)
         ctx.fillStyle = palette.zombieColor
         ctx.fill()
         ctx.closePath()
@@ -413,7 +414,9 @@ class Game extends Component {
         })
 
         let id = null
-        zombies.map(obj => {
+        const zeds = Object.values(zombieList)
+
+        zeds.map(obj => {
           if (obj.health > 0) {
             result = intersects(
               obj.x + pX - playerSize / 2,
@@ -428,7 +431,7 @@ class Game extends Component {
             ) {
               bX = result.x
               bY = result.y
-              id = zombies.indexOf(obj)
+              id = zeds.indexOf(obj)
             }
 
             result = intersects(
@@ -444,7 +447,7 @@ class Game extends Component {
             ) {
               bX = result.x
               bY = result.y
-              id = zombies.indexOf(obj)
+              id = zeds.indexOf(obj)
             }
             result = intersects(
               obj.x + pX + playerSize,
@@ -459,7 +462,7 @@ class Game extends Component {
             ) {
               bX = result.x
               bY = result.y
-              id = zombies.indexOf(obj)
+              id = zeds.indexOf(obj)
             }
             result = intersects(
               obj.x + pX - playerSize / 2,
@@ -474,27 +477,18 @@ class Game extends Component {
             ) {
               bX = result.x
               bY = result.y
-              id = zombies.indexOf(obj)
+              id = zeds.indexOf(obj)
             }
             let hit = false
             const harm = () => {
               if (!hit) {
                 hit = true
-                zombies[id].health--
+
               }
             }
             if (id !== null) {
               harm()
               hit = false
-              if (zombies[id].health <= 0) {
-                const x = Math.round(Math.random() * 500)
-                const y = Math.round(Math.random() * 500)
-                zombies[id].x = x
-                zombies[id].y = y
-                zombies[id].health = 100
-                hit = false
-                points++
-              }
             }
           }
         })
@@ -504,6 +498,7 @@ class Game extends Component {
     }
     const renderOtherPlayers = () => {
       const coords = Object.values(players)
+      console.log(coords)
       coords.forEach(coord => {
         ctx.beginPath()
         ctx.arc(
@@ -519,6 +514,15 @@ class Game extends Component {
         ctx.closePath()
       })
     }
+    const renderOtherBullets=()=>{
+      bullets.map(shot=>{
+        ctx.beginPath()
+        ctx.moveTo(shot.startX, shot.startY)
+        ctx.lineTo(shot.endX, shot.endX)
+        ctx.strokeStyle = palette.tracer
+        ctx.stroke()
+      })
+    }
     const renderPlayer = () => {
       if (!playerDead) {
         ctx.beginPath()
@@ -529,7 +533,8 @@ class Game extends Component {
         ctx.closePath()
         let x = center[0] - pX
         let y = center[1] - pY
-        zombies.map(zed => {
+        const zeds = Object.values(zombieList)
+        zeds.map(zed => {
           if (
             x + playerSize > zed.x - playerSize &&
             x - playerSize < zed.x + playerSize &&
@@ -604,6 +609,7 @@ class Game extends Component {
 
       playerMotionHandler()
       renderBullets()
+      renderOtherBullets()
       renderInfo()
       renderPlayer()
       renderOtherPlayers()
@@ -622,8 +628,8 @@ class Game extends Component {
       <div>
         <canvas
           ref='canvas'
-          width={800}
-          height={800}
+          width={screen.width - 200}
+          height={screen.height -200}
           onKeyPress={this.keyPress}
           tabIndex='0'
         />
@@ -640,3 +646,4 @@ const mapState = state => {
 }
 
 export default connect(mapState)(Game)
+
