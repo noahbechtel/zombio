@@ -15,11 +15,12 @@ module.exports = io => {
   ]
   let zombiesArr = Object.values(zombies)
 
+  const genRanPos = () => {
+    return Math.round(Math.random() * 800) * (Math.random() > 0.5 ? -1 : 1) + 0
+  }
   const makeZom = () => {
-    const x =
-      Math.round(Math.random() * 1000) * (Math.random() > 0.5 ? -1 : 1) + 0
-    const y =
-      Math.round(Math.random() * 1000) * (Math.random() > 0.5 ? -1 : 1) + 0
+    const x = genRanPos()
+    const y = genRanPos()
 
     zombies[id] = { health: 500, x, y }
     id++
@@ -40,7 +41,7 @@ module.exports = io => {
         let centerY = 0
         let pX = 0
         let pY = 0
-        let dist = 1000
+        let dist = 100000
         let playersArr = Object.values(players)
 
         // if (Object.values(players)[0]) {
@@ -117,7 +118,7 @@ module.exports = io => {
         y = zed.y - centerY
         collisions.map(obj => {
           if (
-            x - playerSize / 2 > obj.x &&
+            x - playerSize > obj.x &&
             x - playerSize < obj.x + obj.width &&
             y > obj.y &&
             y < obj.y + obj.height
@@ -171,11 +172,6 @@ module.exports = io => {
 
     zombiesArr = Object.values(zombies)
 
-    socket.on('start-game', res => {
-      const { x, y, centerX, centerY } = res
-      players[String(id)] = { x, y, centerX, centerY }
-    })
-
     // clearInterval(interval)
 
     // interval = setInterval(() => {
@@ -185,14 +181,17 @@ module.exports = io => {
 
     console.log(`A socket connection to the server has been made: ${id}`)
 
-    socket.emit('start', { players, zombies })
-
+    socket.on('start-game', res => {
+      const { x, y, centerX, centerY } = res
+      players[String(id)] = { x, y, centerX, centerY }
+    })
+    socket.emit('start', { players, zombies, id })
     socket.emit('update-zombies', zombies)
 
     socket.on('disconnect', () => {
       console.log('Client disconnected')
       delete players[id]
-      socket.emit('remove-player', id)
+      socket.broadcast.emit('remove-player', id)
     })
 
     socket.on('move-player', res => {
@@ -200,16 +199,27 @@ module.exports = io => {
       if (players[String(id)]) {
         players[id].x = x
         players[id].y = y
-        socket.emit('update-player', id, players[id])
+        socket.broadcast.emit('update-player', players)
       }
     })
 
     socket.on('kill-player', () => {
       delete players[id]
-      socket.broadcast.emit('add-player', players)
+      socket.broadcast.emit('remove-player', id)
     })
     socket.on('fire-player', shot => {
       socket.broadcast.emit('player-shooting', shot)
+    })
+    socket.on('harm-zombie', id => {
+      const zom = zombies[id]
+      zom.health -= 10
+      if (zom.health <= 0) {
+        const x = genRanPos()
+        const y = genRanPos()
+        zom.x = x
+        zom.y = y
+        zom.health = 500
+      }
     })
   })
 }

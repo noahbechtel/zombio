@@ -7,7 +7,10 @@ import {
   killPlayer,
   zombies as zombieList,
   startGame,
-  bullets
+  bullets,
+  harmZombie,
+  emitFire,
+  clearBullets
 } from '../socket'
 
 /**
@@ -47,7 +50,7 @@ class Game extends Component {
     let pX = Math.round(Math.random() * 500) * (Math.random() > 0.5 ? -1 : 1)
     let pY = Math.round(Math.random() * 500) * (Math.random() > 0.5 ? -1 : 1)
     let center = [canvas.width / 2, canvas.height / 2]
-     startGame(pX,pY, center[0],center[1])
+    startGame(pX, pY, center[0], center[1])
     let health = 296
     let stamina = 296
     let sprint = false
@@ -55,8 +58,6 @@ class Game extends Component {
     let firing = false
     let staminaBuffer = 0
     let healthBuffer = 0
-    
-    
 
     let collisions = [
       { x: 20, y: 20, width: 100, height: 10 },
@@ -67,7 +68,6 @@ class Game extends Component {
 
     const keyDownHandler = evt => {
       switch (evt.key) {
-      
         case 'd':
           rightPressed = true
           sprint = false
@@ -346,6 +346,7 @@ class Game extends Component {
           ctx.lineTo(x, y)
           ctx.strokeStyle = palette.tracer
           ctx.stroke()
+          emitFire(pX, pY, x, y)
           flash = false
         } else {
           flash = true
@@ -412,7 +413,8 @@ class Game extends Component {
             bY = result.y
           }
         })
-
+        let shot = false
+        let shotBuffer = 0
         let id = null
         const zeds = Object.values(zombieList)
 
@@ -479,16 +481,19 @@ class Game extends Component {
               bY = result.y
               id = zeds.indexOf(obj)
             }
-            let hit = false
-            const harm = () => {
-              if (!hit) {
-                hit = true
 
-              }
-            }
             if (id !== null) {
-              harm()
-              hit = false
+              if (!shot) {
+                shotBuffer = 10
+                harmZombie(id)
+                shot = true
+              } else {
+                if (shotBuffer > 0) {
+                  shotBuffer--
+                } else {
+                  shot = false
+                }
+              }
             }
           }
         })
@@ -498,12 +503,11 @@ class Game extends Component {
     }
     const renderOtherPlayers = () => {
       const coords = Object.values(players)
-      console.log(coords)
       coords.forEach(coord => {
         ctx.beginPath()
         ctx.arc(
-          center[0] - coord.x + pX,
-          center[1] - coord.y + pY,
+          center[0] + pX - coord.x,
+          center[1] + pY - coord.y,
           playerSize,
           0,
           Math.PI * 2
@@ -514,14 +518,15 @@ class Game extends Component {
         ctx.closePath()
       })
     }
-    const renderOtherBullets=()=>{
-      bullets.map(shot=>{
+    const renderOtherBullets = () => {
+      bullets.map(shot => {
         ctx.beginPath()
-        ctx.moveTo(shot.startX, shot.startY)
-        ctx.lineTo(shot.endX, shot.endX)
+        ctx.moveTo(center[0] + pX - shot.startX, center[1] + pY - shot.startY)
+        ctx.lineTo(center[0] + pX - shot.endX, center[1] + pY -shot.endX)
         ctx.strokeStyle = palette.tracer
         ctx.stroke()
       })
+      clearBullets()
     }
     const renderPlayer = () => {
       if (!playerDead) {
@@ -628,8 +633,8 @@ class Game extends Component {
       <div>
         <canvas
           ref='canvas'
-          width={screen.width - 200}
-          height={screen.height -200}
+          width={window.width}
+          height={window.height}
           onKeyPress={this.keyPress}
           tabIndex='0'
         />
@@ -646,4 +651,3 @@ const mapState = state => {
 }
 
 export default connect(mapState)(Game)
-

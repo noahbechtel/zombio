@@ -6,6 +6,7 @@ export let zombies = {}
 export let bullets = []
 export let startX = 0
 export let startY = 0
+let myId = ''
 
 export const movePlayer = (x, y) => {
   socket.emit('move-player', { x, y })
@@ -19,6 +20,12 @@ export const killPlayer = () => {
 export const startGame = (x, y, centerX, centerY) => {
   socket.emit('start-game', { x, y, centerX, centerY })
 }
+export const harmZombie = id => {
+  socket.emit('harm-zombie', id)
+}
+export const clearBullets = () => {
+  bullets = []
+}
 
 socket.on('connect', p => {
   console.log('Connected')
@@ -26,15 +33,13 @@ socket.on('connect', p => {
 
 socket.on('start', res => {
   console.log('started')
+  myId = res.id
   players = res.players
   zombies = res.zombies
   startX = res.x
   startY = res.y
-  console.log(zombies, players)
 })
-socket.on('me', id => {
-  console.log(id)
-})
+
 socket.on('update-Bullets', b => {
   bullets.push(b)
 })
@@ -43,13 +48,9 @@ socket.on('update-zombies', zoms => {
   zombies = zoms
 })
 
-socket.on('update-player', (id, player) => {
-  if (players[id]) {
-    players[id].x = player.x
-    players[id].y = player.y
-    players[id].centerX = player.centerX
-    players[id].centerY = player.centerY
-  }
+socket.on('update-player', p => {
+  players = p
+  delete players[myId]
 })
 
 socket.on('add-player', p => {
