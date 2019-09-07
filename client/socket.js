@@ -4,6 +4,7 @@ const socket = io(window.location.origin)
 export let players = {}
 export let zombies = {}
 export let bullets = []
+export let collisions = []
 export let startX = 0
 export let startY = 0
 let myId = ''
@@ -38,6 +39,7 @@ socket.on('start', res => {
   zombies = res.zombies
   startX = res.x
   startY = res.y
+  collisions = res.collisions
 })
 
 socket.on('update-Bullets', b => {

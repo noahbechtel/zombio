@@ -1,18 +1,20 @@
+const mapBuilder = require('./builder')
+
 module.exports = io => {
   let players = {}
   let zombies = {}
   let zMax = 3
   let thrust = 0.75
+  let x = 0
+  let y = 0
   let interval
   let serverOn = false
   let playerSize = 15
   let id = 0
-  let collisions = [
-    { x: 20, y: 20, width: 100, height: 10 },
-    { x: 20, y: 20, width: 10, height: 100 },
-    { x: 120, y: 20, width: 10, height: 100 },
-    { x: 120, y: 110, width: 100, height: 10 }
-  ]
+
+  let OneBlock = 460
+  let collisions = mapBuilder()
+
   let zombiesArr = Object.values(zombies)
 
   const genRanPos = () => {
@@ -26,7 +28,7 @@ module.exports = io => {
     id++
   }
 
-  for (let i = 0; i <= 20; i++) {
+  for (let i = 0; i <= 250; i++) {
     makeZom()
   }
   const zombieCompute = () => {
@@ -185,7 +187,7 @@ module.exports = io => {
       const { x, y, centerX, centerY } = res
       players[String(id)] = { x, y, centerX, centerY }
     })
-    socket.emit('start', { players, zombies, id })
+    socket.emit('start', { players, zombies, id, collisions })
     socket.emit('update-zombies', zombies)
 
     socket.on('disconnect', () => {

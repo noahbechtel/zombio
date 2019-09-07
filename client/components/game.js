@@ -10,7 +10,8 @@ import {
   bullets,
   harmZombie,
   emitFire,
-  clearBullets
+  clearBullets,
+  collisions
 } from '../socket'
 
 /**
@@ -41,14 +42,14 @@ class Game extends Component {
     let downPressed = false
     let points = 0
     let playerSize = 15
-    let xLimit = 500
-    let yLimit = 500
+    let xLimit = 2000
+    let yLimit = 2000
     let playerDead = false
     let interval
     let mouseX = 0
     let mouseY = 0
-    let pX = Math.round(Math.random() * 500) * (Math.random() > 0.5 ? -1 : 1)
-    let pY = Math.round(Math.random() * 500) * (Math.random() > 0.5 ? -1 : 1)
+    let pX = Math.round(Math.random() * xLimit) * (Math.random() > 0.5 ? -1 : 1)
+    let pY = Math.round(Math.random() * yLimit) * (Math.random() > 0.5 ? -1 : 1)
     let center = [canvas.width / 2, canvas.height / 2]
     startGame(pX, pY, center[0], center[1])
     let health = 296
@@ -58,13 +59,6 @@ class Game extends Component {
     let firing = false
     let staminaBuffer = 0
     let healthBuffer = 0
-
-    let collisions = [
-      { x: 20, y: 20, width: 100, height: 10 },
-      { x: 20, y: 20, width: 10, height: 100 },
-      { x: 120, y: 20, width: 10, height: 100 },
-      { x: 120, y: 110, width: 100, height: 10 }
-    ]
 
     const keyDownHandler = evt => {
       switch (evt.key) {
@@ -215,7 +209,7 @@ class Game extends Component {
       })
 
       if (sprint && stamina > 0) {
-        stamina--
+        stamina-=.5
       } else {
         if (stamina <= 0 && staminaBuffer === 'end') {
           sprint = false
@@ -633,8 +627,8 @@ class Game extends Component {
       <div>
         <canvas
           ref='canvas'
-          width={window.width}
-          height={window.height}
+          width={screen.width}
+          height={screen.height}
           onKeyPress={this.keyPress}
           tabIndex='0'
         />
