@@ -11,7 +11,9 @@ import {
   harmZombie,
   emitFire,
   clearBullets,
-  collisions
+  collisions,
+  decals,
+  points
 } from '../socket'
 
 /**
@@ -27,7 +29,7 @@ class Game extends Component {
     const palette = {
       zombieColor: '#80ac7b',
       tracer: '#eeeeee',
-      background: '#393e46',
+      background: '#4d4d4d',
       healthBarFG: '#f73859',
       healthBarBG: '#232931',
       staminaBarFG: '#4ecca3',
@@ -40,7 +42,6 @@ class Game extends Component {
     let leftPressed = false
     let upPressed = false
     let downPressed = false
-    let points = 0
     let playerSize = 15
     let xLimit = 2000
     let yLimit = 2000
@@ -59,6 +60,9 @@ class Game extends Component {
     let firing = false
     let staminaBuffer = 0
     let healthBuffer = 0
+    let shotBuffer = 0
+    let shot = false
+    let id = null
 
     const keyDownHandler = evt => {
       switch (evt.key) {
@@ -209,7 +213,7 @@ class Game extends Component {
       })
 
       if (sprint && stamina > 0) {
-        stamina-=.5
+        stamina -= 0.5
       } else {
         if (stamina <= 0 && staminaBuffer === 'end') {
           sprint = false
@@ -239,9 +243,20 @@ class Game extends Component {
       if (leftPressed && moveLeft && pX <= xLimit) sprint ? (pX += 2) : pX++
     }
 
-    const renderMap = () => {
+    const renderCollisions = () => {
       collisions.map(obj => {
         ctx.fillStyle = palette.wallsColor
+        ctx.fillRect(
+          center[0] + pX + obj.x,
+          center[1] + pY + obj.y,
+          obj.width,
+          obj.height
+        )
+      })
+    }
+    const renderDecals = () => {
+      decals.map(obj => {
+        ctx.fillStyle = obj.color
         ctx.fillRect(
           center[0] + pX + obj.x,
           center[1] + pY + obj.y,
@@ -346,6 +361,7 @@ class Game extends Component {
           flash = true
         }
       }
+
       if (firing) {
         let result
         collisions.map(obj => {
@@ -407,9 +423,7 @@ class Game extends Component {
             bY = result.y
           }
         })
-        let shot = false
-        let shotBuffer = 0
-        let id = null
+
         const zeds = Object.values(zombieList)
 
         zeds.map(obj => {
@@ -475,24 +489,24 @@ class Game extends Component {
               bY = result.y
               id = zeds.indexOf(obj)
             }
-
             if (id !== null) {
               if (!shot) {
-                shotBuffer = 10
+                shotBuffer = 3
                 harmZombie(id)
                 shot = true
               } else {
-                if (shotBuffer > 0) {
-                  shotBuffer--
-                } else {
+                if (shotBuffer <= 0) {
                   shot = false
                 }
               }
             }
           }
         })
-
+        id = null
         shoot(bX || mouseX, bY || mouseY)
+      }
+      if (shotBuffer > 0) {
+        shotBuffer--
       }
     }
     const renderOtherPlayers = () => {
@@ -516,7 +530,7 @@ class Game extends Component {
       bullets.map(shot => {
         ctx.beginPath()
         ctx.moveTo(center[0] + pX - shot.startX, center[1] + pY - shot.startY)
-        ctx.lineTo(center[0] + pX - shot.endX, center[1] + pY -shot.endX)
+        ctx.lineTo(center[0] + pX - shot.endX, center[1] + pY - shot.endX)
         ctx.strokeStyle = palette.tracer
         ctx.stroke()
       })
@@ -594,11 +608,11 @@ class Game extends Component {
         ctx.beginPath()
         ctx.fillStyle = palette.pointsColor
         ctx.font = '30px Arial'
-        ctx.fillText('You Died', center[0], center[1])
+        ctx.fillText('You Died', center[0] - 60, center[1] - 30)
         ctx.closePath()
       }
     }
-
+    
     const draw = () => {
       ctx.canvas.width = window.innerWidth
       ctx.canvas.height = window.innerHeight
@@ -607,13 +621,14 @@ class Game extends Component {
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
       playerMotionHandler()
+      renderDecals()
       renderBullets()
       renderOtherBullets()
       renderInfo()
       renderPlayer()
       renderOtherPlayers()
       renderZombies()
-      renderMap()
+      renderCollisions()
       renderFX()
       renderStats()
 

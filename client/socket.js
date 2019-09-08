@@ -5,8 +5,10 @@ export let players = {}
 export let zombies = {}
 export let bullets = []
 export let collisions = []
+export let decals = []
 export let startX = 0
 export let startY = 0
+export let points = 0
 let myId = ''
 
 export const movePlayer = (x, y) => {
@@ -40,6 +42,7 @@ socket.on('start', res => {
   startX = res.x
   startY = res.y
   collisions = res.collisions
+  decals = res.decals
 })
 
 socket.on('update-Bullets', b => {
@@ -64,6 +67,9 @@ socket.on('remove-player', id => {
 })
 socket.on('player-shooting', shot => {
   bullets.push(shot)
+})
+socket.on('zombie-killed', kills => {
+  points = kills
 })
 
 export default socket
