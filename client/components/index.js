@@ -4,3 +4,4 @@
  * having to figure out which file they belong to!
  */
 export { default as Game } from './game'
+export { default as Login } from './login'

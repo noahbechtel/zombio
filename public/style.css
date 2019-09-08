@@ -21,3 +21,72 @@ form div {
   margin: 1em;
   display: inline-block;
 }
+button:focus,input:focus{
+  outline:none;
+}
+input::placeholder{
+  outline:none;
+}
+button{
+  text-align: center;
+  border:none;
+  margin:0;
+  padding: 0;
+  font-size: 1.4em;
+  letter-spacing: 0.05em;
+  background-color: black;
+  color: white;
+  padding:3%;
+  margin:10%;
+  transition: 0.5s;
+
+}
+button:hover{
+  background-color: white;
+  color: black;
+  padding:3.5%;
+  border: 1px solid black;
+}
+input{
+  text-align: center;
+border:none;
+margin:0;
+padding: 0;
+font-size: 1.4em;
+letter-spacing: 0.05em;
+border-bottom: 2px solid black;
+}
+.window{
+ display: flex;
+ justify-content: center;
+  padding:20%
+}
+.box{
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  
+}
+.designer{
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center
+}
+.preview{
+  display: flex;
+  flex-direction: column;
+justify-content: center;
+text-align: center;
+}
+.player{
+  width: 40px;
+  height: 40px;
+  min-height: 40px;
+  min-width: 40px;
+  border-radius: 50%;
+  margin:100px;
+}
+.colorpicker{
+  padding: 10%;
+  
+}

@@ -26,6 +26,7 @@ class Game extends Component {
   componentDidMount () {
     const canvas = this.refs.canvas
     const ctx = canvas.getContext('2d')
+    const { name, color } = this.props
     const palette = {
       zombieColor: '#80ac7b',
       tracer: '#eeeeee',
@@ -34,10 +35,11 @@ class Game extends Component {
       healthBarBG: '#232931',
       staminaBarFG: '#4ecca3',
       staminaBarBG: '#232931',
-      playerColor: '#f5841a',
+      playerColor: color,
       pointsColor: '#fdf6f6',
       wallsColor: '#d3d6db'
     }
+
     let rightPressed = false
     let leftPressed = false
     let upPressed = false
@@ -52,7 +54,7 @@ class Game extends Component {
     let pX = Math.round(Math.random() * xLimit) * (Math.random() > 0.5 ? -1 : 1)
     let pY = Math.round(Math.random() * yLimit) * (Math.random() > 0.5 ? -1 : 1)
     let center = [canvas.width / 2, canvas.height / 2]
-    startGame(pX, pY, center[0], center[1])
+    startGame(pX, pY, center[0], center[1], color, name)
     let health = 296
     let stamina = 296
     let sprint = false
@@ -521,8 +523,17 @@ class Game extends Component {
           Math.PI * 2
         )
         // ctx.rect(center[0], center[1], playerSize, playerSize - 5)
-        ctx.fillStyle = palette.playerColor
+        ctx.fillStyle = coord.color
         ctx.fill()
+        ctx.closePath()
+        ctx.beginPath()
+        ctx.fillStyle = palette.pointsColor
+        ctx.font = '10px Arial'
+        ctx.fillText(
+          coord.name,
+          center[0] + pX - coord.x - coord.name.length * 3,
+          center[1] + pY - coord.y - (playerSize + 10)
+        )
         ctx.closePath()
       })
     }
@@ -612,7 +623,7 @@ class Game extends Component {
         ctx.closePath()
       }
     }
-    
+
     const draw = () => {
       ctx.canvas.width = window.innerWidth
       ctx.canvas.height = window.innerHeight

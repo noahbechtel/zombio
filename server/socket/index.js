@@ -179,8 +179,8 @@ module.exports = io => {
     console.log(`A socket connection to the server has been made: ${id}`)
 
     socket.on('start-game', res => {
-      const { x, y, centerX, centerY } = res
-      players[String(id)] = { x, y, centerX, centerY }
+      const { x, y, centerX, centerY, color, name } = res
+      players[String(id)] = { x, y, centerX, centerY, color, name }
     })
     socket.emit('start', { players, zombies, id, collisions, decals })
     socket.emit('update-zombies', zombies)

@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { withRouter, Route } from 'react-router-dom'
-import { Game } from './components'
+import { Game, Login } from './components'
 
 /**
  * COMPONENT
@@ -10,7 +10,7 @@ class Routes extends Component {
   render () {
     return (
       <div>
-        <Route path='/' component={Game} />
+        <Route path='/' component={Login} />
       </div>
     )
   }

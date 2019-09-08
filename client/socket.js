@@ -20,8 +20,8 @@ export const emitFire = (startX, startY, endX, endY) => {
 export const killPlayer = () => {
   socket.emit('kill-player')
 }
-export const startGame = (x, y, centerX, centerY) => {
-  socket.emit('start-game', { x, y, centerX, centerY })
+export const startGame = (x, y, centerX, centerY, color, name) => {
+  socket.emit('start-game', { x, y, centerX, centerY, color, name })
 }
 export const harmZombie = id => {
   socket.emit('harm-zombie', id)
