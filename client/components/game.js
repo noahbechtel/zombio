@@ -352,6 +352,7 @@ class Game extends Component {
       }
       const shoot = (x, y) => {
         if (flash) {
+          ctx.lineWidth = 5;
           ctx.beginPath()
           ctx.moveTo(center[0], center[1])
           ctx.lineTo(x, y)

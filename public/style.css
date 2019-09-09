@@ -59,13 +59,13 @@ border-bottom: 2px solid black;
 .window{
  display: flex;
  justify-content: center;
-  padding:20%
 }
 .box{
   display: flex;
   align-items: center;
   flex-direction: column;
-  
+  position: absolute;
+  top: 25%;
 }
 .designer{
   display: flex;
