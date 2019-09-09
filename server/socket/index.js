@@ -23,7 +23,7 @@ module.exports = io => {
     id++
   }
 
-  for (let i = 0; i <= 250; i++) {
+  for (let i = 0; i <= 150; i++) {
     makeZom()
   }
   const zombieCompute = () => {
