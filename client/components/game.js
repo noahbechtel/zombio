@@ -572,7 +572,7 @@ class Game extends Component {
         // ctx.fill()
         // ctx.closePath()
        
-          ctx.setTransform(.75, 0, 0, .75, center[0], center[1]);  // set scale and origin
+          ctx.setTransform(.2, 0, 0, .2, center[0], center[1]);  // set scale and origin
           ctx.rotate(Math.atan2(mouseY - center[1], mouseX - center[0])); // set angle
           ctx.drawImage(playerImg,-playerImg.width / 2, -playerImg.height / 2); // draw image
           ctx.setTransform(1, 0, 0, 1, 0, 0); // restore default not needed if you use setTransform for other rendering operations
@@ -658,7 +658,7 @@ class Game extends Component {
       renderDecals()
       renderBullets()
       renderOtherBullets()
-      renderInfo()
+      // renderInfo()
       renderPlayer()
       renderOtherPlayers()
       renderZombies()

@@ -2,6 +2,7 @@ body {
   font-family: sans-serif;
   margin: 0;
   padding: 0;
+  background: lightgray
 }
 
 a {
@@ -30,24 +31,22 @@ input::placeholder{
 button{
   text-align: center;
   border:none;
-  margin:0;
-  padding: 0;
   font-size: 1.4em;
   letter-spacing: 0.05em;
-  background-color: black;
-  color: white;
   padding:3%;
   margin:10%;
   transition: 0.5s;
-
-}
-button:hover{
-  background-color: white;
+  width:100%;
+  background-color: transparent;
   color: black;
-  padding:3.5%;
   border: 1px solid black;
 }
+button:hover{
+  background-color: black;
+  color: white;
+}
 input{
+  background-color: transparent;
   text-align: center;
 border:none;
 margin:0;
@@ -55,6 +54,12 @@ padding: 0;
 font-size: 1.4em;
 letter-spacing: 0.05em;
 border-bottom: 2px solid black;
+}
+br{
+  width: 60%;
+  height:2px;
+  min-width: 60%;
+  min-height: 2px;
 }
 .window{
  display: flex;
@@ -65,7 +70,9 @@ border-bottom: 2px solid black;
   align-items: center;
   flex-direction: column;
   position: absolute;
-  top: 25%;
+  top: 5%;
+  background-color: whitesmoke;
+  padding: 5%;
 }
 .designer{
   display: flex;
@@ -77,14 +84,15 @@ border-bottom: 2px solid black;
   flex-direction: column;
 justify-content: center;
 text-align: center;
+text-underline-position: below;
 }
 .player{
-  width: 40px;
-  height: 40px;
-  min-height: 40px;
-  min-width: 40px;
-  border-radius: 50%;
-  margin:100px;
+  width: 190px;
+  height: 190px;
+  min-height: 50px;
+  min-width: 50px;
+  margin: 50px;
+
 }
 .colorpicker{
   padding: 10%;

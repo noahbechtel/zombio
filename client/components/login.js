@@ -60,7 +60,7 @@ export class Login extends Component {
   handleSubmit = evt => {
     evt.preventDefault()
     const { name, color } = this.state
-    if (name !== '' && color !== '') {
+    if (name !== '') {
       this.setState({ launch: true })
       this.render()
     }
@@ -77,7 +77,8 @@ export class Login extends Component {
               <div className='designer'>
                 <div className='preview'>
                   <h2>Get Ready!</h2>
-                  <div className='player' style={{ backgroundColor: color }} />
+                  <br />
+                  <img className='player' src='./player.png' />
 
                   <input
                     type='text'
@@ -85,12 +86,6 @@ export class Login extends Component {
                     name='name'
                     onChange={evt => this.handleChange(evt)}
                     placeholder='Name'
-                  />
-                </div>
-                <div className='colorpicker'>
-                  <CirclePicker
-                    onChangeComplete={this.handleChangeComplete}
-                    colors={colors}
                   />
                 </div>
               </div>
