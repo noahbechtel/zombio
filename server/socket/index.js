@@ -159,30 +159,28 @@ module.exports = io => {
       }
     })
   }
-  interval = setInterval(() => {
-    zombieCompute()
-    io.emit('update-zombies', zombies)
-  }, 10)
+
+  const setInt = async () => {
+    await clearInterval(interval)
+    interval = await setInterval(() => {
+      zombieCompute()
+      io.emit('update-zombies', zombies)
+    }, 10)
+  }
 
   io.on('connection', socket => {
     const id = socket.id
-
-    zombiesArr = Object.values(zombies)
-
-    // clearInterval(interval)
-
-    // interval = setInterval(() => {
-    //   zombieCompute()
-    //   socket.emit('update-zombies', zombies)
-    // }, 10)
-
     console.log(`A socket connection to the server has been made: ${id}`)
+    zombiesArr = Object.values(zombies)
+    setInt()
 
     socket.on('start-game', res => {
       const { x, y, centerX, centerY, color, name } = res
       players[String(id)] = { x, y, centerX, centerY, color, name }
     })
+
     socket.emit('start', { players, zombies, id, collisions, decals })
+
     socket.emit('update-zombies', zombies)
 
     socket.on('disconnect', () => {
@@ -204,9 +202,11 @@ module.exports = io => {
       delete players[id]
       socket.broadcast.emit('remove-player', id)
     })
+
     socket.on('fire-player', shot => {
       socket.broadcast.emit('player-shooting', shot)
     })
+
     socket.on('harm-zombie', id => {
       const zom = zombies[id]
       zom.health -= 10
