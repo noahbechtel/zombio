@@ -65,6 +65,8 @@ class Game extends Component {
     let shotBuffer = 0
     let shot = false
     let id = null
+    let playerImg = new Image()
+    playerImg.src = './player.png'
 
     const keyDownHandler = evt => {
       switch (evt.key) {
@@ -352,7 +354,7 @@ class Game extends Component {
       }
       const shoot = (x, y) => {
         if (flash) {
-          ctx.lineWidth = 5;
+          ctx.lineWidth = 5
           ctx.beginPath()
           ctx.moveTo(center[0], center[1])
           ctx.lineTo(x, y)
@@ -550,12 +552,19 @@ class Game extends Component {
     }
     const renderPlayer = () => {
       if (!playerDead) {
-        ctx.beginPath()
-        ctx.arc(center[0], center[1], playerSize, 0, Math.PI * 2)
+        // ctx.beginPath()
+        // ctx.arc(center[0], center[1], playerSize, 0, Math.PI * 2)
         // ctx.rect(center[0], center[1], playerSize, playerSize - 5)
-        ctx.fillStyle = palette.playerColor
-        ctx.fill()
-        ctx.closePath()
+        // ctx.fillStyle = palette.playerColor
+        // ctx.fill()
+        // ctx.closePath()
+       
+          ctx.setTransform(1, 0, 0, 1, center[0], center[1]);  // set scale and origin
+          ctx.rotate(Math.atan2(mouseY - center[1], mouseX - center[0])); // set angle
+          ctx.drawImage(playerImg,-playerImg.width / 2, -playerImg.height / 2); // draw image
+          ctx.setTransform(1, 0, 0, 1, 0, 0); // restore default not needed if you use setTransform for other rendering operations
+
+
         let x = center[0] - pX
         let y = center[1] - pY
         const zeds = Object.values(zombieList)
