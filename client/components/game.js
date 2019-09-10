@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { mapPointers } from '../map'
 import {
   movePlayer,
   players,
@@ -67,6 +66,8 @@ class Game extends Component {
     let id = null
     let playerImg = new Image()
     playerImg.src = './player.png'
+    let zomImg = new Image()
+    zomImg.src = './zom.png'
 
     const keyDownHandler = evt => {
       switch (evt.key) {
@@ -271,12 +272,24 @@ class Game extends Component {
     }
     const renderZombies = () => {
       const zeds = Object.values(zombieList)
+      
       zeds.forEach(zed => {
-        ctx.beginPath()
-        ctx.arc(zed.x + pX, zed.y + pY, playerSize, 0, Math.PI * 2)
-        ctx.fillStyle = palette.zombieColor
-        ctx.fill()
-        ctx.closePath()
+        const zX =zed.x + pX
+      const zY =zed.y + pY
+
+
+      ctx.setTransform(.6, 0, 0, .6, zX, zY);  // set scale and origin
+      ctx.rotate(Math.atan2(center[1] - zY, center[0] - zX)); // set angle
+      ctx.drawImage(zomImg,-zomImg.width / 2, -zomImg.height / 2); // draw image
+      ctx.setTransform(1, 0, 0, 1, 0, 0); // restore default not needed if you use setTransform for other rendering operations
+
+
+
+        // ctx.beginPath()
+        // ctx.arc(zX, zY, playerSize, 0, Math.PI * 2)
+        // ctx.fillStyle = palette.zombieColor
+        // ctx.fill()
+        // ctx.closePath()
       })
     }
 
@@ -559,7 +572,7 @@ class Game extends Component {
         // ctx.fill()
         // ctx.closePath()
        
-          ctx.setTransform(1, 0, 0, 1, center[0], center[1]);  // set scale and origin
+          ctx.setTransform(.75, 0, 0, .75, center[0], center[1]);  // set scale and origin
           ctx.rotate(Math.atan2(mouseY - center[1], mouseX - center[0])); // set angle
           ctx.drawImage(playerImg,-playerImg.width / 2, -playerImg.height / 2); // draw image
           ctx.setTransform(1, 0, 0, 1, 0, 0); // restore default not needed if you use setTransform for other rendering operations
