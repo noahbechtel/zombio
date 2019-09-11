@@ -29,14 +29,14 @@ class Game extends Component {
     const palette = {
       zombieColor: '#80ac7b',
       tracer: '#eeeeee',
-      background: '#4d4d4d',
+      background: '#4f4946',
       healthBarFG: '#f73859',
       healthBarBG: '#232931',
       staminaBarFG: '#4ecca3',
       staminaBarBG: '#232931',
       playerColor: color,
       pointsColor: '#fdf6f6',
-      wallsColor: '#d3d6db'
+      wallsColor: '#303030'
     }
 
     let rightPressed = false
@@ -68,6 +68,14 @@ class Game extends Component {
     playerImg.src = './player.png'
     let zomImg = new Image()
     zomImg.src = './zom.png'
+    let sidewalkVert = new Image()
+    sidewalkVert.src = './sidewalkVert.png'
+    let sidewalkHorz = new Image()
+    sidewalkHorz.src = './sidewalkHorz.png'
+    let asphaltVert = new Image()
+    asphaltVert.src = './asphaltVert.png'
+    let asphaltHorz = new Image()
+    asphaltHorz.src = './asphaltHorz.png'
 
     const keyDownHandler = evt => {
       switch (evt.key) {
@@ -250,40 +258,82 @@ class Game extends Component {
 
     const renderCollisions = () => {
       collisions.map(obj => {
-        ctx.fillStyle = palette.wallsColor
+       
+          ctx.fillStyle = palette.wallsColor
         ctx.fillRect(
           center[0] + pX + obj.x,
           center[1] + pY + obj.y,
           obj.width,
           obj.height
         )
+       
       })
     }
     const renderDecals = () => {
       decals.map(obj => {
-        ctx.fillStyle = obj.color
-        ctx.fillRect(
-          center[0] + pX + obj.x,
-          center[1] + pY + obj.y,
-          obj.width,
-          obj.height
-        )
+        switch (obj.type) {
+          case 'road-horizontal':
+            ctx.drawImage(
+              asphaltHorz,
+              center[0] + pX + obj.x,
+              center[1] + pY + obj.y,
+              obj.width,
+              obj.height
+            )
+            break
+          case 'road-verticle':
+            ctx.drawImage(
+              asphaltVert,
+              center[0] + pX + obj.x,
+              center[1] + pY + obj.y,
+              obj.width,
+              obj.height
+            )
+            break
+          case 'sidewalk-horizontal':
+            ctx.drawImage(
+              sidewalkHorz,
+              center[0] + pX + obj.x,
+              center[1] + pY + obj.y,
+              obj.width,
+              obj.height
+            )
+            break
+          case 'sidewalk-verticle':
+            ctx.drawImage(
+              sidewalkVert,
+              center[0] + pX + obj.x,
+              center[1] + pY + obj.y,
+              obj.width,
+              obj.height
+            )
+            break
+            
+
+          default:
+            break
+        }
+
+        // ctx.fillStyle = obj.color
+        // ctx.fillRect(
+        //   center[0] + pX + obj.x,
+        //   center[1] + pY + obj.y,
+        //   obj.width,
+        //   obj.height
+        // )
       })
     }
     const renderZombies = () => {
       const zeds = Object.values(zombieList)
-      
+
       zeds.forEach(zed => {
-        const zX =zed.x + pX
-      const zY =zed.y + pY
+        const zX = zed.x + pX
+        const zY = zed.y + pY
 
-
-      ctx.setTransform(.6, 0, 0, .6, zX, zY);  // set scale and origin
-      ctx.rotate(Math.atan2(center[1] - zY, center[0] - zX)); // set angle
-      ctx.drawImage(zomImg,-zomImg.width / 2, -zomImg.height / 2); // draw image
-      ctx.setTransform(1, 0, 0, 1, 0, 0); // restore default not needed if you use setTransform for other rendering operations
-
-
+        ctx.setTransform(0.2, 0, 0, 0.2, zX, zY) // set scale and origin
+        ctx.rotate(Math.atan2(center[1] - zY, center[0] - zX)) // set angle
+        ctx.drawImage(zomImg, -zomImg.width / 2, -zomImg.height / 2) // draw image
+        ctx.setTransform(1, 0, 0, 1, 0, 0) // restore default not needed if you use setTransform for other rendering operations
 
         // ctx.beginPath()
         // ctx.arc(zX, zY, playerSize, 0, Math.PI * 2)
@@ -367,7 +417,7 @@ class Game extends Component {
       }
       const shoot = (x, y) => {
         if (flash) {
-          ctx.lineWidth = 5
+          ctx.lineWidth = 3
           ctx.beginPath()
           ctx.moveTo(center[0], center[1])
           ctx.lineTo(x, y)
@@ -571,12 +621,11 @@ class Game extends Component {
         // ctx.fillStyle = palette.playerColor
         // ctx.fill()
         // ctx.closePath()
-       
-          ctx.setTransform(.2, 0, 0, .2, center[0], center[1]);  // set scale and origin
-          ctx.rotate(Math.atan2(mouseY - center[1], mouseX - center[0])); // set angle
-          ctx.drawImage(playerImg,-playerImg.width / 2, -playerImg.height / 2); // draw image
-          ctx.setTransform(1, 0, 0, 1, 0, 0); // restore default not needed if you use setTransform for other rendering operations
 
+        ctx.setTransform(0.2, 0, 0, 0.2, center[0], center[1]) // set scale and origin
+        ctx.rotate(Math.atan2(mouseY - center[1], mouseX - center[0])) // set angle
+        ctx.drawImage(playerImg, -playerImg.width / 2, -playerImg.height / 2) // draw image
+        ctx.setTransform(1, 0, 0, 1, 0, 0) // restore default not needed if you use setTransform for other rendering operations
 
         let x = center[0] - pX
         let y = center[1] - pY
@@ -600,7 +649,7 @@ class Game extends Component {
           if (healthBuffer > 0) {
             healthBuffer--
           } else if (health < 296) {
-            health += 0.1
+            health += 0.01
           }
         })
       }
@@ -673,7 +722,7 @@ class Game extends Component {
 
   render () {
     return (
-      <div>
+        
         <canvas
           ref='canvas'
           width={screen.width}
@@ -681,7 +730,6 @@ class Game extends Component {
           onKeyPress={this.keyPress}
           tabIndex='0'
         />
-      </div>
     )
   }
 }

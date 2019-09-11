@@ -54,7 +54,6 @@ module.exports = () => {
       { x, y, width: 10, height: 190 },
       { x, y: y + 270, width: 10, height: 190 }
     ]
-    let field = ['field']
 
     const sidewalkVert = (x, y) => {
       decals.push({
@@ -62,7 +61,7 @@ module.exports = () => {
         y,
         width: sidewalkSize,
         height: blockSize + sidewalkSize,
-        color: '#9e9e9e'
+        type: 'sidewalk-verticle'
       })
     }
 
@@ -72,7 +71,7 @@ module.exports = () => {
         y,
         width: blockSize + sidewalkSize * 2 + 10,
         height: sidewalkSize,
-        color: '#9e9e9e'
+        type: 'sidewalk-horizontal'
       })
     }
     const roadVert = (x, y) => {
@@ -81,7 +80,7 @@ module.exports = () => {
         y,
         width: roadsize,
         height: blockSize + roadsize * 2,
-        color: '#393e46'
+        type: 'road-verticle'
       })
     }
     const roadHoriz = (x, y) => {
@@ -90,11 +89,11 @@ module.exports = () => {
         y,
         width: blockSize + roadsize * 2,
         height: roadsize,
-        color: '#393e46'
+        type: 'road-horizontal'
       })
     }
 
-    let toolSet = [openRoom, corridors, smallCubes, lShape, field]
+    let toolSet = [openRoom, corridors, smallCubes, lShape]
 
     toolSet[Math.floor(Math.random() * toolSet.length)].map(el => {
       constructs.push(el)
