@@ -33,15 +33,7 @@ jobs:
           output_location: "" # Built app content directory - optional
           ###### End of Repository/Build Configurations ######
         env:
-          CI: true # This ensures that npm doesn't ask questions and installs with default settings
-
-          # Modify the 'npm install' and 'npm run build' commands to include '--legacy-peer-deps'
-          # to handle legacy peer dependencies.
-          # 'npm install' installs dependencies.
-          # 'npm run build' builds the app.
-          # '--legacy-peer-deps' is used to handle packages with peer dependencies warnings.
-          npm_config_production: false
-          NPM_FLAGS: '--legacy-peer-deps'
+         NPM_CONFIG_LEGACY_PEER_DEPS: true
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
