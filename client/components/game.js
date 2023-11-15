@@ -1,5 +1,5 @@
-import React, { Component } from 'react'
-import { connect } from 'react-redux'
+import React, {Component} from 'react'
+import {connect} from 'react-redux'
 import {
   movePlayer,
   players,
@@ -19,13 +19,13 @@ import {
  * COMPONENT
  */
 class Game extends Component {
-  constructor () {
+  constructor() {
     super()
   }
-  componentDidMount () {
+  componentDidMount() {
     const canvas = this.refs.canvas
     const ctx = canvas.getContext('2d')
-    const { name, color } = this.props
+    const {name, color} = this.props
     const palette = {
       zombieColor: '#80ac7b',
       tracer: '#eeeeee',
@@ -258,15 +258,13 @@ class Game extends Component {
 
     const renderCollisions = () => {
       collisions.map(obj => {
-       
-          ctx.fillStyle = palette.wallsColor
+        ctx.fillStyle = palette.wallsColor
         ctx.fillRect(
           center[0] + pX + obj.x,
           center[1] + pY + obj.y,
           obj.width,
           obj.height
         )
-       
       })
     }
     const renderDecals = () => {
@@ -308,7 +306,6 @@ class Game extends Component {
               obj.height
             )
             break
-            
 
           default:
             break
@@ -562,10 +559,8 @@ class Game extends Component {
                 shotBuffer = 3
                 harmZombie(id)
                 shot = true
-              } else {
-                if (shotBuffer <= 0) {
-                  shot = false
-                }
+              } else if (shotBuffer <= 0) {
+                shot = false
               }
             }
           }
@@ -664,7 +659,7 @@ class Game extends Component {
 
     const renderFX = () => {
       if (health > 0) {
-        ctx.fillStyle = `rgba(200,30,30,${(100 / health) * 0.1})`
+        ctx.fillStyle = `rgba(200,30,30,${100 / health * 0.1})`
         ctx.fillRect(0, 0, canvas.width, canvas.height)
       } else {
         ctx.fillStyle = `rgba(200,30,30,1)`
@@ -720,16 +715,15 @@ class Game extends Component {
     interval = setInterval(draw, 10)
   }
 
-  render () {
+  render() {
     return (
-        
-        <canvas
-          ref='canvas'
-          width={screen.width}
-          height={screen.height}
-          onKeyPress={this.keyPress}
-          tabIndex='0'
-        />
+      <canvas
+        ref="canvas"
+        width={screen.width}
+        height={screen.height}
+        onKeyPress={this.keyPress}
+        tabIndex="0"
+      />
     )
   }
 }
